@@ -6,32 +6,38 @@ import {Navigate} from 'react-router-dom'
 export default class CreatePersonaje extends Component {
     url = Global.urlPersonajes
     state = {
-        personaje: [],
+        personajes: [],
+        series: [],
         mensaje: "",
         status: false
     }
 
     cajaID = React.createRef();
     cajaNombre = React.createRef();
-    cajaImagen = React.createRef();
-    cajaIdSerie = React.createRef()
 
-    updatePersonaje = (event) => {
-        event.preventDefault();
-        let request = "api/personajes"
-        let personaje = {
-            idPersonaje: parseInt(this.cajaID.current.value),
-            nombre: this.cajaNombre.current.value,
-            imagen: this.cajaImagen.current.value,
-            idSerie: parseInt(this.cajaIdSerie.current.value),
-        }
-        axios.put(this.url + request, personaje).then(
+    loadSeries = () => {
+        let request = "api/series"
+        axios.get(this.url + request).then(response => {
             this.setState({
-                mensaje: "Se ha creado el personaje",
-                status: true
+                series: response.data
             })
-        )
+        })
+    }
 
+        loadPersonajes = () => {
+        let request = "api/personajes"
+        axios.get(this.url + request).then(response => {
+            this.setState({
+                personajes: response.data
+            })
+        })
+    }
+
+
+
+    componentDidMount = () => {
+        this.loadPersonajes();
+        this.loadSeries();
     }
 
   render() {
@@ -51,23 +57,27 @@ export default class CreatePersonaje extends Component {
                         )}
                         <form>
                             <div className="mb-3">
-                                <label className="form-label">ID</label>
-                                <input className="form-control" type="text" ref={this.cajaID} placeholder="Introduzca ID"/>
+                                <label className="form-label">Seleccione una serie: </label>
+                                <select className="form-select" ref={this.cajaID}>
+                                    {
+                                        this.state.series.map((serie, index) => (
+                                            <option key={index}>{serie.nombre}</option>
+                                        ))
+                                    }
+                                </select>
                             </div>
                             <div className="mb-3">
-                                <label className="form-label">Nombre</label>
-                                <input className="form-control" type="text" ref={this.cajaNombre} placeholder="Introduzca nombre"/>
+                                <label className="form-label">Selecciona un personaje: </label>
+                                <select className="form-select" ref={this.cajaID}>
+                                    {
+                                        this.state.personajes.map((personaje, index) => (
+                                            <option key={index}>{personaje.nombre}</option>
+                                        ))
+                                    }
+                                </select>
                             </div>
-                            <div className="mb-3">
-                                <label className="form-label">Imagen</label>
-                                <input className="form-control" type="text" ref={this.cajaImagen} placeholder="Introduzca imagen"/>
-                            </div>
-                            <div className="mb-3">
-                                <label className="form-label">ID Serie</label>
-                                <input className="form-control" type="text" ref={this.cajaIdSerie} placeholder="Introduzca id serie"/>
-                            </div>
-                            <button type="button" className="btn btn-primary w-100" onClick={this.updatePersonaje}>
-                            Crear Personaje
+                            <button type="button" className="btn btn-primary w-100">
+                            Modificar Personaje
                             </button>
                         {
                             this.state.status === true &&
